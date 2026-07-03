@@ -35,7 +35,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://carwatch-backend.onrender.com/api/") // URL placeholder para o backend Shikirou
+            .baseUrl("http://10.0.2.2:8000/api/") // IP padrão para acessar o localhost do PC no emulador Android
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
