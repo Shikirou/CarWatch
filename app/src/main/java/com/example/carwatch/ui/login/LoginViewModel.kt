@@ -44,51 +44,20 @@ class LoginViewModel @Inject constructor(
 
     fun onSignInClick(context: Context) {
         viewModelScope.launch {
-            val activity = findActivity(context)
-            if (activity == null) {
-                _uiState.value = LoginUiState(error = "Não foi possível encontrar uma Activity")
-                return@launch
-            }
-
             _uiState.value = LoginUiState(isLoading = true)
             
-            val credentialManager = CredentialManager.create(activity)
+            // Login bypass: Ignora o CredentialManager para evitar erros em outros PCs
+            // e autentica diretamente no MockAuthRepository
+            val authResult = authRepository.signInWithGoogle(
+                idToken = "bypass_token",
+                displayName = "Dev User",
+                photoUrl = null
+            )
             
-            // IMPORTANTE: Substitua pelo seu Web Client ID do Google Cloud Console
-            val serverClientId = "103434843639-i5b5flnb89su7l43c9qp0qp0bj2usi2k.apps.googleusercontent.com"
-            
-            // Usando GetGoogleIdOption com configurações que forçam a exibição do seletor
-            val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
-                .setFilterByAuthorizedAccounts(false) // Mostra todas as contas, não apenas as já logadas no app
-                .setServerClientId(serverClientId)
-                .setAutoSelectEnabled(false)
-                .build()
-
-            val request = GetCredentialRequest.Builder()
-                .addCredentialOption(googleIdOption)
-                .build()
-
-            try {
-                val result = credentialManager.getCredential(
-                    context = activity,
-                    request = request
-                )
-                handleSignIn(result)
-            } catch (e: GetCredentialException) {
-                // Log detalhado para depuração no Logcat
-                android.util.Log.e("LoginViewModel", "Erro CredentialManager: ${e.type} - ${e.message}")
-                
-                val errorMessage = when (e.type) {
-                    "android.credentials.GetCredentialException.TYPE_USER_CANCELED" -> 
-                        "Login cancelado pelo usuário"
-                    "android.credentials.GetCredentialException.TYPE_NO_CREDENTIAL" -> 
-                        "Conta não encontrada. Verifique: 1. Se há uma conta Google logada no celular. 2. Se o SHA-1 no Console é o de DEBUG (./gradlew signingReport). 3. Se o Client ID no código é o tipo 'WEB'."
-                    else -> "Erro (${e.type}): ${e.message}"
-                }
-                _uiState.value = LoginUiState(error = errorMessage)
-            }
-catch (e: Exception) {
-                _uiState.value = LoginUiState(error = "Erro ao iniciar: ${e.localizedMessage}")
+            if (authResult.isSuccess) {
+                _uiState.value = LoginUiState(isSuccess = true)
+            } else {
+                _uiState.value = LoginUiState(error = "Falha ao entrar no modo dev")
             }
         }
     }

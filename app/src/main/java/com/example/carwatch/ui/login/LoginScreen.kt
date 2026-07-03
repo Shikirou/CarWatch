@@ -87,7 +87,7 @@ fun LoginScreen(
                     onClick = { viewModel.onSignInClick(context) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(text = "Entrar com Google")
+                    Text(text = "Entrar no CarWatch")
                 }
             }
 

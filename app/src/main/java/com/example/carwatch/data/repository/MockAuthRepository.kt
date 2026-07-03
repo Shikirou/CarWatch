@@ -18,14 +18,19 @@ class MockAuthRepository @Inject constructor() : AuthRepository {
         displayName: String?,
         photoUrl: String?
     ): Result<Unit> {
-        // Mock sign in - using data from Google Credential
+        // Mock sign in sempre retornando sucesso imediatamente sem depender de token real
         _currentUser.value = User(
-            id = "google_$idToken".take(20),
-            email = "user@example.com",
-            displayName = displayName ?: "Usuário Google",
+            id = "user_id_default",
+            email = "dev@carwatch.com",
+            displayName = displayName ?: "Desenvolvedor CarWatch",
             photoUrl = photoUrl
         )
         return Result.success(Unit)
+    }
+
+    // Método para login rápido para facilitar o trabalho de outros devs
+    suspend fun quickSignIn() {
+        signInWithGoogle("mock_token", "Dev Guest", null)
     }
 
     override suspend fun signOut() {

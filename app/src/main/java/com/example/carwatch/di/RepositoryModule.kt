@@ -1,5 +1,6 @@
 package com.example.carwatch.di
 
+import com.example.carwatch.data.repository.CarWatchRepositoryImpl
 import com.example.carwatch.data.repository.MockAuthRepository
 import com.example.carwatch.data.repository.MockCarWatchRepository
 import com.example.carwatch.domain.repository.AuthRepository
@@ -17,7 +18,7 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindCarWatchRepository(
-        mockRepository: MockCarWatchRepository
+        repositoryImpl: CarWatchRepositoryImpl
     ): CarWatchRepository
 
     @Binds
