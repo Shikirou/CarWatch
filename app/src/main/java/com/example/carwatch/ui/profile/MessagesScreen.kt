@@ -26,26 +26,22 @@ import coil.compose.AsyncImage
 import com.example.carwatch.ui.theme.LogoRed
 import kotlinx.coroutines.launch
 
-data class Chat(
-    val id: String,
-    val userName: String,
-    val userPhoto: String?,
-    val vehicleName: String,
-    val vehiclePhoto: String?,
-    val lastMessage: String,
-    val time: String,
-    val unreadCount: Int = 0
-)
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.carwatch.domain.repository.ChatEntry
 
 data class Message(val text: String, val isMe: Boolean)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MessagesScreen(onBack: () -> Unit) {
-    var selectedChat by remember { mutableStateOf<Chat?>(null) }
+fun MessagesScreen(
+    onBack: () -> Unit,
+    viewModel: MessagesViewModel = hiltViewModel()
+) {
+    var selectedChat by remember { mutableStateOf<ChatEntry?>(null) }
+    val chats by viewModel.chats.collectAsState()
 
     if (selectedChat == null) {
-        ChatListScreen(onBack, onChatClick = { selectedChat = it })
+        ChatListScreen(onBack, chats, onChatClick = { selectedChat = it })
     } else {
         ChatDetailScreen(chat = selectedChat!!, onBack = { selectedChat = null })
     }
@@ -53,12 +49,7 @@ fun MessagesScreen(onBack: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatListScreen(onBack: () -> Unit, onChatClick: (Chat) -> Unit) {
-    val chats = listOf(
-        Chat("1", "João Silva", null, "Tesla Model 3", "https://placehold.co/100x100?text=Tesla", "Ainda está disponível?", "14:20", 2),
-        Chat("2", "Maria Oliveira", null, "BMW X5", "https://placehold.co/100x100?text=BMW", "Aceita proposta?", "Ontem", 0)
-    )
-
+fun ChatListScreen(onBack: () -> Unit, chats: List<ChatEntry>, onChatClick: (ChatEntry) -> Unit) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -72,17 +63,23 @@ fun ChatListScreen(onBack: () -> Unit, onChatClick: (Chat) -> Unit) {
         },
         containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
-        LazyColumn(modifier = Modifier.padding(padding).fillMaxSize()) {
-            items(chats) { chat ->
-                ChatItem(chat, onClick = { onChatClick(chat) })
-                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color.Gray.copy(alpha = 0.2f))
+        if (chats.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Nenhuma conversa iniciada", color = Color.Gray)
+            }
+        } else {
+            LazyColumn(modifier = Modifier.padding(padding).fillMaxSize()) {
+                items(chats) { chat ->
+                    ChatItem(chat, onClick = { onChatClick(chat) })
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color.Gray.copy(alpha = 0.2f))
+                }
             }
         }
     }
 }
 
 @Composable
-fun ChatItem(chat: Chat, onClick: () -> Unit) {
+fun ChatItem(chat: ChatEntry, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -145,7 +142,7 @@ fun ChatItem(chat: Chat, onClick: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatDetailScreen(chat: Chat, onBack: () -> Unit) {
+fun ChatDetailScreen(chat: ChatEntry, onBack: () -> Unit) {
     var messageText by remember { mutableStateOf("") }
     val messages = remember { mutableStateListOf(
         Message("Olá! O ${chat.vehicleName} ainda está disponível?", true),

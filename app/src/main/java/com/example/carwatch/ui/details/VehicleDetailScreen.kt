@@ -31,7 +31,8 @@ import java.util.*
 fun VehicleDetailScreen(
     vehicle: Vehicle,
     onBackClick: () -> Unit,
-    onFavoriteClick: () -> Unit
+    onFavoriteClick: () -> Unit,
+    onContactClick: () -> Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Sobre", "Galeria", "Avaliações")
@@ -45,7 +46,7 @@ fun VehicleDetailScreen(
         bottomBar = {
             DetailBottomBar(
                 price = currencyFormatter.format(vehicle.price),
-                onBuyClick = { /* Contato */ }
+                onBuyClick = onContactClick
             )
         },
         containerColor = MaterialTheme.colorScheme.background

@@ -49,6 +49,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.foundation.shape.RoundedCornerShape
 
+import com.example.carwatch.ui.profile.ProfileViewModel
+import com.example.carwatch.ui.sell.SellViewModel
+
 sealed class Screen(val route: String) {
     object Splash : Screen("splash")
     object Login : Screen("login")
@@ -200,7 +203,10 @@ class MainActivity : ComponentActivity() {
                                     VehicleDetailScreen(
                                         vehicle = vehicle,
                                         onBackClick = { navController.popBackStack() },
-                                        onFavoriteClick = { homeViewModel.toggleFavorite(vehicle.id) }
+                                        onFavoriteClick = { homeViewModel.toggleFavorite(vehicle.id) },
+                                        onContactClick = {
+                                            navController.navigate(Screen.Messages.route)
+                                        }
                                     )
                                 }
                             }
@@ -268,7 +274,8 @@ fun FavoritesScreen(
 @Composable
 fun ProfileScreen(
     user: com.example.carwatch.domain.repository.User?,
-    onNavigate: (String) -> Unit
+    onNavigate: (String) -> Unit,
+    viewModel: ProfileViewModel = hiltViewModel()
 ) {
     Scaffold(
         bottomBar = {
@@ -303,6 +310,20 @@ fun ProfileScreen(
             }
             ProfileMenuItem(Icons.Default.Settings, "Configurações", "Preferências da conta") {
                 onNavigate(Screen.Settings.route)
+            }
+            
+            Spacer(modifier = Modifier.weight(1f))
+            
+            Button(
+                onClick = { 
+                    viewModel.logout()
+                    onNavigate(Screen.Login.route)
+                },
+                modifier = Modifier.fillMaxWidth().padding(bottom = 100.dp).height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Sair da Conta", color = LogoRed, fontWeight = FontWeight.Bold)
             }
         }
     }

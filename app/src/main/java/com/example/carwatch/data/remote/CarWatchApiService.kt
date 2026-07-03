@@ -5,11 +5,7 @@ import com.example.carwatch.data.remote.model.UserRegisterRequest
 import com.example.carwatch.data.remote.model.UserResponse
 import com.example.carwatch.domain.model.Agency
 import com.example.carwatch.domain.model.Vehicle
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface CarWatchApiService {
     @POST("auth/register")
@@ -19,7 +15,7 @@ interface CarWatchApiService {
     suspend fun login(@Body request: UserLoginRequest): UserResponse
 
     @GET("vehicles/featured")
-    suspend fun getFeaturedOffers(): List<Vehicle>
+    suspend fun getFeaturedOffers(@Query("userId") userId: String?): List<Vehicle>
 
     @GET("agencies/nearby")
     suspend fun getNearbyAgencies(
@@ -32,5 +28,29 @@ interface CarWatchApiService {
     suspend fun getAgencyVehicles(@Path("id") agencyId: String): List<Vehicle>
 
     @GET("vehicles/search")
-    suspend fun searchVehicles(@Query("q") query: String): List<Vehicle>
+    suspend fun searchVehicles(@Query("q") query: String, @Query("userId") userId: String?): List<Vehicle>
+
+    @POST("vehicles/favorite/{id}")
+    suspend fun toggleFavorite(@Path("id") vehicleId: String, @Query("userId") userId: String)
+
+    @POST("vehicles")
+    suspend fun postVehicle(@Body vehicle: Vehicle): Vehicle
+
+    @GET("notifications")
+    suspend fun getNotifications(): List<NotificationResponse>
+
+    @GET("chats")
+    suspend fun getChats(@Query("userId") userId: String): List<ChatResponse>
 }
+
+data class NotificationResponse(val id: String, val title: String, val message: String, val time: String)
+data class ChatResponse(
+    val id: String, 
+    val userName: String, 
+    val userPhoto: String?, 
+    val vehicleName: String, 
+    val vehiclePhoto: String?, 
+    val lastMessage: String, 
+    val time: String,
+    val unreadCount: Int
+)

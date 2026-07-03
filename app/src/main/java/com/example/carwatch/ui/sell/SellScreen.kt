@@ -18,10 +18,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.carwatch.ui.theme.LogoRed
 
+import androidx.hilt.navigation.compose.hiltViewModel
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SellScreen(onBack: () -> Unit, onFinish: () -> Unit) {
+fun SellScreen(
+    onBack: () -> Unit, 
+    onFinish: () -> Unit,
+    viewModel: SellViewModel = hiltViewModel()
+) {
     var step by remember { mutableIntStateOf(1) }
+    val isSuccess by viewModel.isSuccess.collectAsState()
+
+    LaunchedEffect(isSuccess) {
+        if (isSuccess) {
+            onFinish()
+        }
+    }
     
     // Form States
     var placa by remember { mutableStateOf("") }
@@ -67,7 +80,13 @@ fun SellScreen(onBack: () -> Unit, onFinish: () -> Unit) {
             }
             
             Button(
-                onClick = { if (step < 5) step++ else onFinish() },
+                onClick = { 
+                    if (step < 5) {
+                        step++ 
+                    } else {
+                        viewModel.publishVehicle(marca, modelo, quilometragem, preco, descricao)
+                    }
+                },
                 modifier = Modifier.fillMaxWidth().padding(24.dp).height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = LogoRed)
